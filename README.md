@@ -27,6 +27,8 @@ pip install beautifulsoup4
 
 Check out this repo and save it to a local folder.
 
+> You may want to check out the prompts in main.py, I put the instructions near the top so they're easier to edit. In particular, I had both the chunk analysis and the synthesis scripts structure their output into specific categories that came up on the two dozen samples I ran on reddit. You can tailor these instructions to your preference.
+
 ### 5. Create API Key File
 
 In this folder, create the file "chatgpt_api_key.txt" and enter your API key as the file's content.
