@@ -1,6 +1,5 @@
+from openai.error import InvalidRequestError
 
-
-import os
 import json
 import openai
 import pandas as pd
@@ -11,7 +10,7 @@ class GPTCore:
 
     ##-------------------start-of-init()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    def __init__(self, instructions="You are a helpful assistant.", model="gpt-3.5-turbo", filename=None, inserts=None):
+    def __init__(self, instructions="You are a helpful assistant.", model="gpt-3.5-turbo", filename:str | None=None, inserts=None):
 
         """
         
@@ -95,7 +94,6 @@ class GPTCore:
         ## Compile the messages for GPT
         outbound_messages = [{"role": "system", "content": self.instructions}]
         for index, row in self.messages.iterrows():
-
             if(row['sendable']):
                 actor_role = "user" if row['actor'] != "assistant" else "assistant"
                 outbound_messages.append({
@@ -112,11 +110,26 @@ class GPTCore:
                 model=self.model,
                 messages=outbound_messages
             )
-        except openai.error.InvalidRequestError as e:  ## Adjust this to the specific error class you expect
+            if not hasattr(response, 'choices'):
+                raise AttributeError("The response object does not contain a 'choices' attribute.")
+             
+            assistant_message = response['choices'][0]['message']['content'] ## type: ignore (Seems to be a common issue with the openai library)
 
+            ## If store_message is True, store the user and AI's messages to the history
+            if(store_message and message is not None):
+                self.add_message(message)
+
+            if(store_message):
+                self.add_message(assistant_message, actor="assistant")
+            
+            if(self.filename):
+                self.save_chat()
+
+            return assistant_message
+
+        except InvalidRequestError as e:  ## Adjust this to the specific error class you expect
             ## Check if the error is due to too many tokens and if we have retries left
             if("Please reduce the length of the messages" in str(e) and retries > 0):
-
                 ## Mark the oldest non-background sendable message as unsendable
                 for index, row in self.messages.iterrows():
                     if row['sendable'] and row['actor'] != "background":
@@ -125,22 +138,8 @@ class GPTCore:
 
                 ## Recursive call with decremented retries
                 return self.generate_response(message, store_message, retries-1)
-            
             else:
                 raise e
-
-        ## If store_message is True, store the user and AI's messages to the history
-        if(store_message and message is not None):
-            self.add_message(message)
-        assistant_message = response.choices[0].message['content']
-
-        if(store_message):
-            self.add_message(assistant_message, actor="assistant")
-        
-        if(self.filename):
-            self.save_chat()
-
-        return assistant_message
 
 ##-------------------start-of-save_chat()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -167,7 +166,7 @@ class GPTCore:
             "model": self.model
         }
 
-        with open(self.filename, 'w') as f:
+        with open(self.filename, 'w') as f: ## type: ignore (filename is not None)
             json.dump(chat_data, f, indent=4)
 
 ##-------------------start-of-main()---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
