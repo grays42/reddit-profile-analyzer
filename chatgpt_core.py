@@ -68,7 +68,7 @@ class ChatGptCore:
         except openai.error.RateLimitError:
             if retries > 0:
                 time.sleep(20)  # Wait for 20 seconds before retrying
-                return self.generate_response(message, store_message, retries, retries-1)
+                return self.generate_response(message, store_message, retries-1)
             else:
                 raise  # Re-raise the exception if no retries left
         except openai.error.InvalidRequestError as e:  # Adjust this to the specific error class you expect
