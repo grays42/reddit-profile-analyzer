@@ -45,7 +45,7 @@ class ChatGptCore:
         self.messages = pd.concat([self.messages, new_entry], ignore_index=True)
         #print(self.messages)
 
-    def generate_response(self, message=None, store_message=True, retries=3):
+    def generate_response(self, message=None, store_message=True, retries=5):
         # Compile the messages for GPT
         outbound_messages = [{"role": "system", "content": self.instructions}]
         for index, row in self.messages.iterrows():
@@ -65,6 +65,12 @@ class ChatGptCore:
                 model=self.model,
                 messages=outbound_messages
             )
+        except openai.error.RateLimitError:
+            if retries > 0:
+                time.sleep(20)  # Wait for 20 seconds before retrying
+                return self.generate_response(message, store_message, retries, retries-1)
+            else:
+                raise  # Re-raise the exception if no retries left
         except openai.error.InvalidRequestError as e:  # Adjust this to the specific error class you expect
             # Check if the error is due to too many tokens and if we have retries left
             if "Please reduce the length of the messages" in str(e) and retries > 0:
