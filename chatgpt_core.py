@@ -1,6 +1,7 @@
 # Note that this file was not purpose-made for the reddit history thing, I use it for other conversation scripts I've made and have removed a bunch of functions that aren't relevant.
 
 import os
+import time
 import json
 import openai
 import pandas as pd
@@ -19,7 +20,7 @@ class ChatGptCore:
         self.filename = filename
         self.inserts = inserts if inserts else {}
         self.messages = pd.DataFrame(columns=["actor", "message", "sendable"])
-        
+
         if filename:
             try:
                 with open(filename, 'r') as f:
@@ -91,7 +92,7 @@ class ChatGptCore:
         assistant_message = response.choices[0].message['content']
         if store_message:
             self.add_message(assistant_message, actor="assistant")
-        
+
         if self.filename:
             self.save_chat()
 
