@@ -2,6 +2,10 @@
 
 A ChatGPT-based Reddit profile analyzer. (Bring your own API key.)
 
+This script will input comments obtained from redditcommentsearch.com and perform a psychological profile analysis on the redditor in question. It does this by breaking the comments into chunks and performing several individual analyses, then synthesizing the result into one single analysis.
+
+The prompts located in the main.py script file guide this process and can be tuned to preference, most notably to affect what categories are analyzed. ("Freeform" analysis produced wildly inconsistent results, so some imposition of structure like categories is recommended to make sure all of the chunk analyses are comparable to each other.)
+
 ## Instructions (For the Complete Newbie)
 
 > Note: For each of these instructions, ask ChatGPT how to do it! It's super informative. Simply copy the instruction you're not sure about, paste it into ChatGPT, and ask "How do I do this?". It will provide you with detailed step-by-step instructions.
